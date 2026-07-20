@@ -7,10 +7,12 @@ type Theme = "light" | "dark"
 const ThemeContext = createContext<{
   theme: Theme
   toggle: () => void
-}>({ theme: "light", toggle: () => {} })
+  prefersReducedMotion: boolean
+}>({ theme: "light", toggle: () => {}, prefersReducedMotion: false })
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>("light")
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
 
   useEffect(() => {
     const stored = localStorage.getItem("theme") as Theme | null
@@ -18,6 +20,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       setTheme(stored)
       document.documentElement.classList.toggle("dark", stored === "dark")
     }
+
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)")
+    setPrefersReducedMotion(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches)
+    mq.addEventListener("change", handler)
+    return () => mq.removeEventListener("change", handler)
   }, [])
 
   const toggle = () => {
@@ -28,7 +36,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <ThemeContext.Provider value={{ theme, toggle }}>
+    <ThemeContext.Provider value={{ theme, toggle, prefersReducedMotion }}>
       {children}
     </ThemeContext.Provider>
   )

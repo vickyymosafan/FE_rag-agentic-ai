@@ -6,6 +6,7 @@ import { RightInputPanel } from "@/components/layout/right-input-panel"
 import { MobileInputDrawer } from "@/components/layout/mobile-input-drawer"
 import { CommandPalette } from "@/components/layout/command-palette"
 import { ErrorBoundary } from "@/components/layout/error-boundary"
+import { addToHistory } from "@/components/layout/chat-history"
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -44,6 +45,7 @@ export default function ChatPage() {
   })
 
   const handleSend = useCallback(async (query: string) => {
+    addToHistory(query)
     const userMsg: Message = {
       id: crypto.randomUUID(),
       role: "user",

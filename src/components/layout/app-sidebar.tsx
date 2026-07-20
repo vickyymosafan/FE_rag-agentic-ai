@@ -16,24 +16,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import {
-  FileText,
-  History,
-  Search,
-  FolderOpen,
-  Settings,
-} from "lucide-react"
+import { FileText, History, Search, FolderOpen } from "lucide-react"
 import { FileTree } from "@/components/layout/file-tree"
 import { SearchPanel } from "@/components/layout/search-panel"
 import { CollectionList } from "@/components/layout/collection-list"
+import { ChatHistory } from "@/components/layout/chat-history"
 import { useSession } from "next-auth/react"
-
-const historyItems = [
-  { query: "Syarat pendaftaran TA", time: "5m ago" },
-  { query: "Berapa SKS yang harus ditempuh?", time: "1h ago" },
-  { query: "Jadwal KKN 2026", time: "3h ago" },
-  { query: "Syarat KP semester genap", time: "1d ago" },
-]
 
 export function AppSidebar() {
   const { data: session } = useSession()
@@ -75,29 +63,8 @@ export function AppSidebar() {
             </ScrollArea>
           </TabsContent>
 
-          <TabsContent value="history" className="flex-1 px-2">
-            <ScrollArea className="h-full">
-              <SidebarGroup>
-                <SidebarGroupLabel>Chat History</SidebarGroupLabel>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {historyItems.map((item) => (
-                      <SidebarMenuItem key={item.query}>
-                        <SidebarMenuButton className="text-xs">
-                          <History className="size-3.5 shrink-0" />
-                          <div className="flex flex-col min-w-0">
-                            <span className="truncate">{item.query}</span>
-                            <span className="text-[10px] text-muted-foreground">
-                              {item.time}
-                            </span>
-                          </div>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
-            </ScrollArea>
+          <TabsContent value="history" className="flex-1">
+            <ChatHistory />
           </TabsContent>
 
           <TabsContent value="search" className="flex-1">
