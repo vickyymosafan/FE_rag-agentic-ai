@@ -9,8 +9,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { ChevronDown } from "lucide-react"
-import ReactMarkdown from "react-markdown"
-import remarkGfm from "remark-gfm"
+import { MarkdownContent } from "./markdown/markdown-content"
 import { MessageFeedback } from "./message-feedback"
 
 interface AIMessageProps {
@@ -44,16 +43,14 @@ export function AIMessage({
           </Badge>
         </div>
 
-        <div className="text-sm leading-relaxed [&_pre]:bg-muted [&_pre]:p-3 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_code]:text-xs [&_code]:font-mono [&_blockquote]:border-l-2 [&_blockquote]:pl-4 [&_blockquote]:text-muted-foreground [&_table]:w-full [&_th]:text-left [&_th]:p-2 [&_th]:bg-muted [&_td]:p-2 [&_td]:border-t [&_tr]:border-border [&_table]:border-collapse">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {content}
-          </ReactMarkdown>
+        <div className="text-sm leading-relaxed [&_blockquote]:border-l-2 [&_blockquote]:pl-4 [&_blockquote]:text-muted-foreground [&_table]:w-full [&_th]:text-left [&_th]:p-2 [&_th]:bg-muted [&_td]:p-2 [&_td]:border-t [&_tr]:border-border [&_table]:border-collapse">
+          <MarkdownContent content={content} />
         </div>
 
         {citations.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {citations.map((cite, i) => (
-              <Badge key={i} variant="outline" className="text-[10px]">
+              <Badge key={i} variant="outline" className="text-[10px] cursor-pointer hover:bg-accent">
                 {cite.docName}, Hal {cite.page}
               </Badge>
             ))}
