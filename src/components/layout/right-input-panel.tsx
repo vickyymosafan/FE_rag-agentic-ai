@@ -13,6 +13,7 @@ import {
 import { Send, Paperclip, Loader2, X } from "lucide-react"
 import { useState } from "react"
 import { useFileUpload, type FileAttachment } from "@/lib/use-file-upload"
+import { useChatStats } from "@/lib/chat-stats-context"
 
 type Model = "gemini" | "groq" | "cohere" | "openrouter"
 
@@ -25,6 +26,7 @@ export function RightInputPanel({ onSend, isLoading }: RightInputPanelProps) {
   const [input, setInput] = useState("")
   const [model, setModel] = useState<Model>("gemini")
   const { file, error, inputRef, selectFile, removeFile, handleFileChange } = useFileUpload()
+  const { stats } = useChatStats()
 
   const handleSend = () => {
     if (!input.trim() || isLoading) return
@@ -83,10 +85,10 @@ export function RightInputPanel({ onSend, isLoading }: RightInputPanelProps) {
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="secondary" className="text-[10px]">
-            📄 0 sources
+            📄 {stats.sourcesCount} sources
           </Badge>
           <Badge variant="secondary" className="text-[10px]">
-            🎯 0.00
+            🎯 {stats.confidence.toFixed(2)}
           </Badge>
           <Button size="sm" className="h-8 gap-1" onClick={handleSend} disabled={isLoading || !input.trim()}>
             {isLoading ? <Loader2 className="size-3.5 animate-spin" /> : <Send className="size-3.5" />}

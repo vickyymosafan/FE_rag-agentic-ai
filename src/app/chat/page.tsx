@@ -8,6 +8,7 @@ import { CommandPalette } from "@/components/layout/command-palette"
 import { ErrorBoundary } from "@/components/layout/error-boundary"
 import { addToHistory } from "@/components/layout/chat-history"
 import type { FileAttachment } from "@/lib/use-file-upload"
+import { useChatStats } from "@/lib/chat-stats-context"
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -40,6 +41,8 @@ export default function ChatPage() {
     },
   ])
   const [isLoading, setIsLoading] = useState(false)
+
+  const { setStats } = useChatStats()
 
   useKeyboardShortcuts({
     onCommandPalette: () => setCommandOpen(true),
@@ -75,16 +78,26 @@ export default function ChatPage() {
       )
       const data = await res.json()
 
+      const confidence = data.confidence ?? 0
+      const asiScore = data.asiScore ?? 0
+      const citations = data.citations ?? []
       const assistantMsg: Message = {
         id: crypto.randomUUID(),
         role: "assistant",
         content: data.answer ?? "Maaf, saya tidak dapat menemukan jawaban dari dokumen yang tersedia.",
-        citations: data.citations ?? [],
-        confidence: data.confidence ?? 0,
-        asiScore: data.asiScore ?? 0,
+        citations,
+        confidence,
+        asiScore,
         reasoningPath: data.reasoningPath ?? [],
       }
       setMessages((prev) => [...prev, assistantMsg])
+      setStats({
+        asiScore,
+        confidence,
+        sourcesCount: citations.length,
+        model: model ?? "Gemini 2.5 Flash",
+        cacheHit: data.cacheHit ?? false,
+      })
     } catch {
       const errorMsg: Message = {
         id: crypto.randomUUID(),

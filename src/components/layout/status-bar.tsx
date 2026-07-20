@@ -2,23 +2,11 @@
 
 import { useSession } from "next-auth/react"
 import { ThemeToggle } from "./theme-toggle"
+import { useChatStats } from "@/lib/chat-stats-context"
 
-interface StatusBarProps {
-  asiScore?: number
-  model?: string
-  sources?: number
-  confidence?: number
-  cacheHit?: boolean
-}
-
-export function StatusBar({
-  asiScore = 0,
-  model = "Gemini 2.5 Flash",
-  sources = 0,
-  confidence = 0,
-  cacheHit = false,
-}: StatusBarProps) {
+export function StatusBar() {
   const { data: session } = useSession()
+  const { stats } = useChatStats()
 
   return (
     <div className="flex items-center justify-between h-6 px-3 text-[11px] text-white bg-[var(--status-bar)] select-none">
@@ -32,11 +20,11 @@ export function StatusBar({
         )}
       </div>
       <div className="flex items-center gap-3">
-        <span>ASI {asiScore.toFixed(2)}</span>
-        <span>⚡ {model}</span>
-        <span>📄 {sources} sources</span>
-        <span>🎯 {confidence.toFixed(2)}</span>
-        {cacheHit && <span>⚡ Cache</span>}
+        <span>ASI {stats.asiScore.toFixed(2)}</span>
+        <span>⚡ {stats.model}</span>
+        <span>📄 {stats.sourcesCount} sources</span>
+        <span>🎯 {stats.confidence.toFixed(2)}</span>
+        {stats.cacheHit && <span>⚡ Cache</span>}
         <ThemeToggle />
       </div>
     </div>
