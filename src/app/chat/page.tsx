@@ -7,7 +7,6 @@ import { MobileInputDrawer } from "@/components/layout/mobile-input-drawer"
 import { CommandPalette } from "@/components/layout/command-palette"
 import { ErrorBoundary } from "@/components/layout/error-boundary"
 import { addToHistory } from "@/components/layout/chat-history"
-import { client } from "@/lib/hono-client"
 import type { FileAttachment } from "@/lib/use-file-upload"
 import { useChatStats } from "@/lib/chat-stats-context"
 import {

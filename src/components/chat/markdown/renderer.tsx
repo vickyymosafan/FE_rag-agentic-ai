@@ -1,9 +1,8 @@
 "use client"
 
-import { useState, type ComponentPropsWithoutRef } from "react"
+import { useState, useEffect, type ComponentPropsWithoutRef } from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import rehypeShiki from "@shikijs/rehype"
 import { Button } from "@/components/ui/button"
 import { Copy, Check } from "lucide-react"
 
@@ -61,11 +60,34 @@ function ImageViewer({ src, alt }: ComponentPropsWithoutRef<"img">) {
   )
 }
 
+let shikiPlugin: ((...args: any[]) => any) | null = null
+
 export function MarkdownRenderer({ content }: { content: string }) {
+  const [ready, setReady] = useState(!!shikiPlugin)
+
+  useEffect(() => {
+    if (shikiPlugin) return
+    ;(async () => {
+      const { createHighlighter, createJavaScriptRegexEngine } = await import("shiki")
+      const { default: rehypeShikiFromHighlighter } = await import("@shikijs/rehype/core")
+      const highlighter = await createHighlighter({
+        themes: ["github-dark"],
+        langs: ["javascript", "typescript", "python", "bash", "json", "sql", "html", "css", "xml", "text"],
+        engine: createJavaScriptRegexEngine(),
+      })
+      shikiPlugin = rehypeShikiFromHighlighter(highlighter, { theme: "github-dark" })
+      setReady(true)
+    })()
+  }, [])
+
+  if (!ready) {
+    return <span className="text-sm whitespace-pre-wrap">{content}</span>
+  }
+
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
-      rehypePlugins={[[rehypeShiki, { theme: "github-dark" }]]}
+      rehypePlugins={[() => shikiPlugin!]}
       components={{
         pre: ({ children }) => <>{children}</>,
         img: ImageViewer,
