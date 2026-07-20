@@ -9,6 +9,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { ChevronDown } from "lucide-react"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 
 interface AIMessageProps {
   content: string
@@ -39,8 +41,10 @@ export function AIMessage({
           </Badge>
         </div>
 
-        <div className="text-sm leading-relaxed whitespace-pre-wrap">
-          {content}
+        <div className="text-sm leading-relaxed [&_pre]:bg-muted [&_pre]:p-3 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_code]:text-xs [&_code]:font-mono [&_blockquote]:border-l-2 [&_blockquote]:pl-4 [&_blockquote]:text-muted-foreground [&_table]:w-full [&_th]:text-left [&_th]:p-2 [&_th]:bg-muted [&_td]:p-2 [&_td]:border-t [&_tr]:border-border [&_table]:border-collapse">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {content}
+          </ReactMarkdown>
         </div>
 
         {citations.length > 0 && (
