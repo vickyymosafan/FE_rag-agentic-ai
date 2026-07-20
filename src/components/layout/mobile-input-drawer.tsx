@@ -42,6 +42,11 @@ export function MobileInputDrawer({ onSend, isLoading }: MobileInputDrawerProps)
             placeholder="Ask about TA/KP/KKN/Kurikulum..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                handleSend()
+              }
+            }}
             className="min-h-[100px] resize-none"
             disabled={isLoading}
             autoFocus
