@@ -7,6 +7,7 @@ import { MobileInputDrawer } from "@/components/layout/mobile-input-drawer"
 import { CommandPalette } from "@/components/layout/command-palette"
 import { ErrorBoundary } from "@/components/layout/error-boundary"
 import { addToHistory } from "@/components/layout/chat-history"
+import type { FileAttachment } from "@/lib/use-file-upload"
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -44,23 +45,29 @@ export default function ChatPage() {
     onCommandPalette: () => setCommandOpen(true),
   })
 
-  const handleSend = useCallback(async (query: string) => {
+  const handleSend = useCallback(async (query: string, file?: FileAttachment) => {
     addToHistory(query)
     const userMsg: Message = {
       id: crypto.randomUUID(),
       role: "user",
-      content: query,
+      content: file ? `${query}\n\n[Attached: ${file.name}]` : query,
     }
     setMessages((prev) => [...prev, userMsg])
     setIsLoading(true)
 
     try {
+      const body: Record<string, unknown> = { query, userId: "anonymous" }
+      if (file) {
+        body.fileName = file.name
+        body.fileType = file.type
+        body.fileData = file.base64
+      }
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8787"}/api/rag/query`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query, userId: "anonymous" }),
+          body: JSON.stringify(body),
         }
       )
       const data = await res.json()

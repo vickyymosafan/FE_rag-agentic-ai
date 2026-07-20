@@ -10,21 +10,24 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer"
-import { Send, MessageSquarePlus, Loader2 } from "lucide-react"
+import { Send, MessageSquarePlus, Loader2, Paperclip, X } from "lucide-react"
+import { useFileUpload, type FileAttachment } from "@/lib/use-file-upload"
 
 interface MobileInputDrawerProps {
-  onSend: (query: string) => void
+  onSend: (query: string, file?: FileAttachment) => void
   isLoading: boolean
 }
 
 export function MobileInputDrawer({ onSend, isLoading }: MobileInputDrawerProps) {
   const [input, setInput] = useState("")
   const [open, setOpen] = useState(false)
+  const { file, error, inputRef, selectFile, removeFile, handleFileChange } = useFileUpload()
 
   const handleSend = () => {
     if (!input.trim() || isLoading) return
-    onSend(input.trim())
+    onSend(input.trim(), file ?? undefined)
     setInput("")
+    removeFile()
     setOpen(false)
   }
 
@@ -51,18 +54,34 @@ export function MobileInputDrawer({ onSend, isLoading }: MobileInputDrawerProps)
             disabled={isLoading}
             autoFocus
           />
-          <Button
-            className="w-full gap-2"
-            onClick={handleSend}
-            disabled={isLoading || !input.trim()}
-          >
-            {isLoading ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Send className="size-4" />
-            )}
-            {isLoading ? "Thinking..." : "Send"}
-          </Button>
+          {file && (
+            <div className="flex items-center gap-2 px-2 py-1 rounded-md bg-muted text-xs">
+              <Paperclip className="size-3 text-muted-foreground" />
+              <span className="truncate">{file.name}</span>
+              <Button variant="ghost" size="icon" className="size-4 ml-auto" onClick={removeFile}>
+                <X className="size-3" />
+              </Button>
+            </div>
+          )}
+          {error && <p className="text-[10px] text-destructive">{error}</p>}
+          <div className="flex gap-2">
+            <Button variant="outline" size="icon" onClick={selectFile} disabled={isLoading}>
+              <Paperclip className="size-4" />
+            </Button>
+            <input ref={inputRef} type="file" accept=".pdf,.docx" className="hidden" onChange={handleFileChange} />
+            <Button
+              className="flex-1 gap-2"
+              onClick={handleSend}
+              disabled={isLoading || !input.trim()}
+            >
+              {isLoading ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Send className="size-4" />
+              )}
+              {isLoading ? "Thinking..." : "Send"}
+            </Button>
+          </div>
         </div>
       </DrawerContent>
     </Drawer>
