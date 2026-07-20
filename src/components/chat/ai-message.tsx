@@ -9,34 +9,26 @@ import { Bot, ChevronDown, FileText } from "lucide-react";
 import { useTheme } from "@/components/layout/theme-provider";
 import { MarkdownContent } from "./markdown/markdown-content";
 import { MessageFeedback } from "./message-feedback";
-
-interface Citation {
-  id: string;
-  docName: string;
-  page: number;
-}
-
-interface AIMessageProps {
-  content: string;
-  citations?: Citation[];
-  reasoningPath?: string[];
-  sourcesCount?: number;
-  confidence?: string;
-  model?: string;
-  timestamp: string;
-}
+import type { ChatMessage } from "@/lib/chat-context";
 
 export function AIMessage({
+  id,
   content,
   citations = [],
   reasoningPath = [],
-  sourcesCount = 0,
-  confidence = "N/A",
+  confidence = 0,
   model = "Gemini 2.5 Flash",
   timestamp,
-}: AIMessageProps) {
+}: ChatMessage) {
   const { prefersReducedMotion } = useTheme();
   const [reasoningOpen, setReasoningOpen] = useState(false);
+
+  const formattedTime = new Date(timestamp).toLocaleTimeString("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  const formattedConfidence = confidence ? (confidence > 1 ? (confidence / 100).toFixed(2) : confidence.toFixed(2)) : "N/A";
 
   return (
     <motion.div
@@ -57,14 +49,15 @@ export function AIMessage({
           <MarkdownContent content={content} />
         </div>
 
-        {citations.length > 0 && (
+        {citations && citations.length > 0 && (
           <div className="flex flex-wrap gap-2 pt-2">
-            {citations.map((cit) => (
+            {citations.map((cit, idx) => (
               <Card
-                key={cit.id}
+                key={idx}
                 className="flex items-center gap-1.5 px-2 py-1 cursor-pointer hover:bg-muted transition-colors border"
                 onClick={() => {
-                  // TODO: handle scroll to citation highlight
+                  const el = document.querySelector(`[data-message-id="${id}"]`);
+                  el?.scrollIntoView({ behavior: "smooth", block: "center" });
                 }}
               >
                 <FileText className="w-3 h-3 text-muted-foreground" />
@@ -75,7 +68,7 @@ export function AIMessage({
           </div>
         )}
 
-        {reasoningPath.length > 0 && (
+        {reasoningPath && reasoningPath.length > 0 && (
           <Collapsible open={reasoningOpen} onOpenChange={setReasoningOpen} className="pt-2">
             <CollapsibleTrigger className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors">
               🔍 Reasoning Path ({reasoningPath.length} steps)
@@ -93,15 +86,15 @@ export function AIMessage({
 
         <div className="flex items-center justify-between pt-2 border-t mt-2">
           <div className="text-[10px] text-muted-foreground flex items-center gap-2">
-            <span>📄 {sourcesCount} sources</span>
+            <span>📄 {citations ? citations.length : 0} sources</span>
             <span>·</span>
-            <span>🎯 {confidence}</span>
+            <span>🎯 {formattedConfidence}</span>
             <span>·</span>
             <span>⚡ {model}</span>
           </div>
           <div className="flex items-center gap-3">
-            <MessageFeedback />
-            <span className="text-[10px] text-muted-foreground">{timestamp}</span>
+            <MessageFeedback messageId={id} />
+            <span className="text-[10px] text-muted-foreground">{formattedTime}</span>
           </div>
         </div>
       </Card>

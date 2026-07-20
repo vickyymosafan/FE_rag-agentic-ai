@@ -9,21 +9,10 @@ import { WelcomeScreen } from "./welcome-screen";
 import { UserMessage } from "./user-message";
 import { AIMessage } from "./ai-message";
 import { LoadingMessage } from "./loading-message";
-
-interface Message {
-  id: string;
-  role: "user" | "assistant" | "system";
-  content: string;
-  timestamp: string;
-  citations?: any[];
-  reasoningPath?: string[];
-  sourcesCount?: number;
-  confidence?: string;
-  model?: string;
-}
+import type { ChatMessage } from "@/lib/chat-context";
 
 interface ChatMessagesProps {
-  messages: Message[];
+  messages: ChatMessage[];
   isLoading: boolean;
   onQuerySelect: (query: string) => void;
 }
@@ -58,8 +47,7 @@ export function ChatMessages({ messages, isLoading, onQuerySelect }: ChatMessage
     return () => observer.disconnect();
   }, []);
 
-  const displayMessages = messages.filter((m) => m.role !== "system");
-  const showWelcome = displayMessages.length === 0 && !isLoading;
+  const showWelcome = messages.length === 0 && !isLoading;
 
   if (showWelcome) {
     return <WelcomeScreen onQuerySelect={onQuerySelect} />;
@@ -70,7 +58,7 @@ export function ChatMessages({ messages, isLoading, onQuerySelect }: ChatMessage
       <ScrollArea className="flex-1 px-4 py-4">
         <div className="max-w-3xl mx-auto w-full flex flex-col gap-4 pb-4">
           <AnimatePresence mode="popLayout">
-            {displayMessages.map((msg) => {
+            {messages.map((msg) => {
               if (msg.role === "user") {
                 return (
                   <UserMessage
@@ -83,13 +71,7 @@ export function ChatMessages({ messages, isLoading, onQuerySelect }: ChatMessage
               return (
                 <AIMessage
                   key={msg.id}
-                  content={msg.content}
-                  timestamp={msg.timestamp}
-                  citations={msg.citations}
-                  reasoningPath={msg.reasoningPath}
-                  sourcesCount={msg.sourcesCount}
-                  confidence={msg.confidence}
-                  model={msg.model}
+                  {...msg}
                 />
               );
             })}

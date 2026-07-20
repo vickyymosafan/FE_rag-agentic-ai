@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useChat } from "@/lib/chat-context";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PanelRightClose, Paperclip, Send, X, File, Database, Sparkles } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { PanelRightClose, Paperclip, Send, X, File, Database } from "lucide-react";
+import { useFileUpload, type FileAttachment } from "@/lib/use-file-upload";
 
 const SUGGESTIONS = [
   "Syarat daftar TA",
@@ -16,20 +16,22 @@ const SUGGESTIONS = [
   "Mata kuliah wajib"
 ];
 
-export function RightInputPanel({ onSend, isLoading }: { onSend: (q: string, file?: File, model?: string) => void; isLoading?: boolean }) {
-  const { rightPanelCollapsed, setRightPanelCollapsed, stats } = useChat();
-  const [input, setInput] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [model, setModel] = useState("gemini");
-  const fileInputRef = useRef<HTMLInputElement>(null);
+interface RightInputPanelProps {
+  onSend: (query: string, file?: FileAttachment, model?: string) => void;
+  isLoading?: boolean;
+}
 
-  if (rightPanelCollapsed) return null;
+export function RightInputPanel({ onSend, isLoading }: RightInputPanelProps) {
+  const { setRightPanelCollapsed, stats } = useChat();
+  const [input, setInput] = useState("");
+  const [model, setModel] = useState("gemini");
+  const { file, inputRef, selectFile, removeFile, handleFileChange } = useFileUpload();
 
   const handleSend = () => {
     if (!input.trim() && !file) return;
     onSend(input, file || undefined, model);
     setInput("");
-    setFile(null);
+    removeFile();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -40,7 +42,7 @@ export function RightInputPanel({ onSend, isLoading }: { onSend: (q: string, fil
   };
 
   return (
-    <div className="w-[300px] border-l border-border bg-sidebar flex flex-col h-full shrink-0">
+    <div className="w-full border-l border-border bg-sidebar flex flex-col h-full shrink-0">
       <div className="flex items-center justify-between px-3 py-2 border-b border-border">
         <h2 className="text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/70">Query Input</h2>
         <Button variant="ghost" size="icon" className="h-6 w-6 rounded-md hover:bg-accent" onClick={() => setRightPanelCollapsed(true)}>
@@ -53,12 +55,15 @@ export function RightInputPanel({ onSend, isLoading }: { onSend: (q: string, fil
           <div className="mb-4">
             <div className="text-[10px] text-muted-foreground mb-2">Suggested</div>
             <div className="flex flex-wrap gap-2">
-              {SUGGESTIONS.map(s => (
+              {SUGGESTIONS.map((s) => (
                 <Badge
                   key={s}
                   variant="outline"
                   className="text-[10px] font-normal cursor-pointer hover:bg-accent transition-colors py-1"
-                  onClick={() => { setInput(s); onSend(s, undefined, model); }}
+                  onClick={() => {
+                    setInput(s);
+                    onSend(s, undefined, model);
+                  }}
                 >
                   {s}
                 </Badge>
@@ -75,7 +80,7 @@ export function RightInputPanel({ onSend, isLoading }: { onSend: (q: string, fil
               <File className="w-3.5 h-3.5 text-blue-500 shrink-0" />
               <span className="text-[11px] truncate">{file.name}</span>
             </div>
-            <button onClick={() => setFile(null)} className="p-0.5 hover:bg-accent rounded-sm ml-2 shrink-0">
+            <button onClick={removeFile} className="p-0.5 hover:bg-accent rounded-sm ml-2 shrink-0">
               <X className="w-3.5 h-3.5 text-muted-foreground" />
             </button>
           </div>
@@ -91,28 +96,45 @@ export function RightInputPanel({ onSend, isLoading }: { onSend: (q: string, fil
           />
           <div className="flex items-center justify-between p-2 border-t border-border bg-muted/20">
             <div className="flex items-center gap-2">
-              <input type="file" ref={fileInputRef} className="hidden" onChange={e => setFile(e.target.files?.[0] || null)} />
-              <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" onClick={() => fileInputRef.current?.click()}>
+              <input
+                type="file"
+                ref={inputRef}
+                accept=".pdf,.docx"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                onClick={selectFile}
+              >
                 <Paperclip className="h-3.5 w-3.5" />
               </Button>
-              <Select value={model} onValueChange={setModel}>
+              <Select value={model} onValueChange={(v) => v && setModel(v)}>
                 <SelectTrigger className="h-6 text-[10px] border-0 bg-transparent px-1 focus:ring-0 shadow-none hover:bg-accent w-auto space-x-1">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="gemini" className="text-[11px]">Gemini Pro</SelectItem>
-                  <SelectItem value="claude" className="text-[11px]">Claude 3</SelectItem>
-                  <SelectItem value="gpt4" className="text-[11px]">GPT-4o</SelectItem>
+                  <SelectItem value="gemini" className="text-[11px]">Gemini 2.5 Flash</SelectItem>
+                  <SelectItem value="groq" className="text-[11px]">Groq Llama 3</SelectItem>
+                  <SelectItem value="cohere" className="text-[11px]">Cohere Command</SelectItem>
+                  <SelectItem value="openrouter" className="text-[11px]">OpenRouter</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="flex items-center gap-2">
-              {stats.activeSources > 0 && (
+              {stats.sourcesCount > 0 && (
                 <Badge variant="outline" className="h-5 text-[9px] px-1.5 flex gap-1 font-normal bg-background">
-                  <Database className="w-2.5 h-2.5" /> {stats.activeSources}
+                  <Database className="w-2.5 h-2.5" /> {stats.sourcesCount}
                 </Badge>
               )}
-              <Button size="icon" className="h-6 w-6 rounded-md bg-blue-600 hover:bg-blue-700 text-white" disabled={isLoading || (!input.trim() && !file)} onClick={handleSend}>
+              <Button
+                size="icon"
+                className="h-6 w-6 rounded-md bg-blue-600 hover:bg-blue-700 text-white"
+                disabled={isLoading || (!input.trim() && !file)}
+                onClick={handleSend}
+              >
                 <Send className="h-3 w-3" />
               </Button>
             </div>

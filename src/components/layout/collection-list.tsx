@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/components/layout/theme-provider";
 import { GraduationCap, Briefcase, Users, BookOpen, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 
 type Category = {
   id: string;
@@ -78,9 +77,9 @@ function CollectionItem({ category, onQuerySelect }: { category: Category, onQue
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={prefersReducedMotion ? false : { height: 0, opacity: 0 }}
-            animate={prefersReducedMotion ? false : { height: "auto", opacity: 1 }}
-            exit={prefersReducedMotion ? false : { height: 0, opacity: 0 }}
+            initial={prefersReducedMotion ? undefined : { height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={prefersReducedMotion ? undefined : { height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
             <div className="pl-9 pr-3 pb-2 pt-1 flex flex-wrap gap-1.5">

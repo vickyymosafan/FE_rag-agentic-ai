@@ -27,34 +27,32 @@ export function ActivityBar() {
   const { theme, toggle } = useTheme();
 
   const topItems = [
-    { id: "files", icon: FileText, label: "Explorer" },
-    { id: "search", icon: Search, label: "Search" },
-    { id: "history", icon: MessageSquare, label: "Chat History" },
-    { id: "collections", icon: FolderOpen, label: "Collections" },
+    { id: "files" as const, icon: FileText, label: "Explorer" },
+    { id: "search" as const, icon: Search, label: "Search" },
+    { id: "history" as const, icon: MessageSquare, label: "Chat History" },
+    { id: "collections" as const, icon: FolderOpen, label: "Collections" },
   ];
 
   return (
-    <TooltipProvider delayDuration={0}>
-      <div className="w-[48px] h-full flex flex-col items-center bg-activity-bar text-activity-bar-foreground py-2 gap-0.5">
+    <TooltipProvider delay={0}>
+      <div className="w-[48px] h-full flex flex-col items-center bg-activity-bar text-activity-bar-foreground py-2 gap-0.5 shrink-0 z-20">
         {topItems.map((item) => {
           const Icon = item.icon;
           const isActive = activePanel === item.id;
           return (
             <Tooltip key={item.id}>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => setActivePanel(item.id)}
-                  className={`relative flex items-center justify-center w-12 h-12 vscode-hover transition-colors ${
-                    isActive
-                      ? "text-white activity-indicator"
-                      : "opacity-80 hover:opacity-100 text-activity-bar-foreground"
-                  }`}
-                  aria-label={item.label}
-                >
-                  <Icon className="size-6 stroke-[1.5]" />
-                </button>
+              <TooltipTrigger
+                onClick={() => setActivePanel(item.id)}
+                className={`relative flex items-center justify-center w-12 h-12 vscode-hover transition-colors ${
+                  isActive
+                    ? "text-white activity-indicator"
+                    : "opacity-80 hover:opacity-100 text-activity-bar-foreground"
+                }`}
+                aria-label={item.label}
+              >
+                <Icon className="size-6 stroke-[1.5]" />
               </TooltipTrigger>
-              <TooltipContent side="right" className="text-[12px] bg-popover text-popover-foreground border-border">
+              <TooltipContent side="right" className="text-[12px]">
                 {item.label}
               </TooltipContent>
             </Tooltip>
@@ -63,18 +61,16 @@ export function ActivityBar() {
 
         <div className="mt-auto flex flex-col items-center gap-0.5 w-full">
           <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => setActivePanel("settings")}
-                className={`relative flex items-center justify-center w-12 h-12 vscode-hover transition-colors ${
-                  activePanel === "settings"
-                    ? "text-white activity-indicator"
-                    : "opacity-80 hover:opacity-100 text-activity-bar-foreground"
-                }`}
-                aria-label="Settings"
-              >
-                <Settings className="size-6 stroke-[1.5]" />
-              </button>
+            <TooltipTrigger
+              onClick={() => setActivePanel("settings")}
+              className={`relative flex items-center justify-center w-12 h-12 vscode-hover transition-colors ${
+                activePanel === "settings"
+                  ? "text-white activity-indicator"
+                  : "opacity-80 hover:opacity-100 text-activity-bar-foreground"
+              }`}
+              aria-label="Settings"
+            >
+              <Settings className="size-6 stroke-[1.5]" />
             </TooltipTrigger>
             <TooltipContent side="right" className="text-[12px]">
               Settings
@@ -82,18 +78,16 @@ export function ActivityBar() {
           </Tooltip>
 
           <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={toggle}
-                className="relative flex items-center justify-center w-12 h-12 opacity-80 hover:opacity-100 transition-colors vscode-hover text-activity-bar-foreground"
-                aria-label="Toggle Theme"
-              >
-                {theme === "dark" ? (
-                  <Sun className="size-6 stroke-[1.5]" />
-                ) : (
-                  <Moon className="size-6 stroke-[1.5]" />
-                )}
-              </button>
+            <TooltipTrigger
+              onClick={toggle}
+              className="relative flex items-center justify-center w-12 h-12 opacity-80 hover:opacity-100 transition-colors vscode-hover text-activity-bar-foreground"
+              aria-label="Toggle Theme"
+            >
+              {theme === "dark" ? (
+                <Sun className="size-6 stroke-[1.5]" />
+              ) : (
+                <Moon className="size-6 stroke-[1.5]" />
+              )}
             </TooltipTrigger>
             <TooltipContent side="right" className="text-[12px]">
               Toggle Theme
@@ -101,18 +95,16 @@ export function ActivityBar() {
           </Tooltip>
 
           <Tooltip>
-            <TooltipTrigger asChild>
-              <button className="relative flex items-center justify-center w-12 h-12 opacity-80 hover:opacity-100 transition-colors vscode-hover">
-                <Avatar className="size-8">
-                  <AvatarImage
-                    src={session?.user?.image ?? ""}
-                    alt={session?.user?.name ?? "User"}
-                  />
-                  <AvatarFallback className="bg-transparent text-activity-bar-foreground">
-                    <User className="size-5 stroke-[1.5]" />
-                  </AvatarFallback>
-                </Avatar>
-              </button>
+            <TooltipTrigger className="relative flex items-center justify-center w-12 h-12 opacity-80 hover:opacity-100 transition-colors vscode-hover">
+              <Avatar className="size-8">
+                <AvatarImage
+                  src={session?.user?.image ?? ""}
+                  alt={session?.user?.name ?? "User"}
+                />
+                <AvatarFallback className="bg-transparent text-activity-bar-foreground">
+                  <User className="size-5 stroke-[1.5]" />
+                </AvatarFallback>
+              </Avatar>
             </TooltipTrigger>
             <TooltipContent side="right" className="text-[12px]">
               {session?.user?.name ?? "Account"}

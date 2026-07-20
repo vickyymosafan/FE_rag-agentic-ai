@@ -5,8 +5,14 @@ import { useChatStats } from "@/lib/chat-context";
 import { GitBranch } from "lucide-react";
 
 export function StatusBar() {
-  const stats = useChatStats();
+  const { stats } = useChatStats();
   const { data: session } = useSession();
+
+  const asiScore = (stats?.asiScore ?? 0).toFixed(2);
+  const confidence = (stats?.confidence ?? 0).toFixed(2);
+  const model = stats?.model ?? "Gemini 2.5 Flash";
+  const sourcesCount = stats?.sourcesCount ?? 0;
+  const cacheHit = stats?.cacheHit ?? false;
 
   return (
     <div className="flex h-[22px] w-full items-center px-2 bg-status-bar text-status-bar-foreground text-[11px] select-none shrink-0 overflow-hidden">
@@ -15,15 +21,15 @@ export function StatusBar() {
           <GitBranch className="size-3" />
           <span>main</span>
         </div>
-        
+
         <div className="status-separator" />
-        
+
         <div className="flex items-center px-1.5 py-0 h-full hover:bg-white/10 cursor-default rounded-sm transition-colors">
-          <span>🎯 ASI {stats.asiScore.toFixed(2)}</span>
+          <span>🎯 ASI {asiScore}</span>
         </div>
-        
+
         <div className="status-separator" />
-        
+
         <div className="flex items-center px-1.5 py-0 h-full hover:bg-white/10 cursor-default rounded-sm transition-colors">
           <span>⚠ 0</span>
         </div>
@@ -31,22 +37,22 @@ export function StatusBar() {
 
       <div className="flex items-center h-full ml-auto">
         <div className="flex items-center px-1.5 py-0 h-full hover:bg-white/10 cursor-default rounded-sm transition-colors">
-          <span>⚡ {stats.model}</span>
+          <span>⚡ {model}</span>
         </div>
 
         <div className="status-separator" />
 
         <div className="flex items-center px-1.5 py-0 h-full hover:bg-white/10 cursor-default rounded-sm transition-colors">
-          <span>📄 {stats.sourcesCount} sources</span>
+          <span>📄 {sourcesCount} sources</span>
         </div>
 
         <div className="status-separator" />
 
         <div className="flex items-center px-1.5 py-0 h-full hover:bg-white/10 cursor-default rounded-sm transition-colors">
-          <span>🎯 {stats.confidence.toFixed(2)}</span>
+          <span>🎯 {confidence}</span>
         </div>
 
-        {stats.cacheHit && (
+        {cacheHit && (
           <>
             <div className="status-separator" />
             <div className="flex items-center px-1.5 py-0 h-full hover:bg-white/10 cursor-default rounded-sm transition-colors text-[#89D185]">

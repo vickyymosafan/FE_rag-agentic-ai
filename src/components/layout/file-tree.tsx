@@ -122,9 +122,9 @@ function TreeItem({
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              initial={prefersReducedMotion ? false : { height: 0, opacity: 0 }}
-              animate={prefersReducedMotion ? false : { height: "auto", opacity: 1 }}
-              exit={prefersReducedMotion ? false : { height: 0, opacity: 0 }}
+              initial={prefersReducedMotion ? undefined : { height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={prefersReducedMotion ? undefined : { height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
               {node.children.map((child) => (

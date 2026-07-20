@@ -15,7 +15,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <SessionProvider>
       <QueryClientProvider client={queryClient}>
         <ChatProvider>
-          <TooltipProvider delayDuration={0}>
+          <TooltipProvider delay={0}>
             <SidebarProvider>{children}</SidebarProvider>
             <Toaster />
           </TooltipProvider>

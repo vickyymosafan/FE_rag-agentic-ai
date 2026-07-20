@@ -13,18 +13,16 @@ export function ThemeToggle() {
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          onClick={toggle}
-          className="flex items-center justify-center size-10 rounded-sm hover:bg-white/10 transition-colors"
-          aria-label={`Switch to ${theme === "light" ? "dark" : "light"} theme`}
-        >
-          {theme === "light" ? (
-            <Moon className="size-[18px]" />
-          ) : (
-            <Sun className="size-[18px]" />
-          )}
-        </button>
+      <TooltipTrigger
+        onClick={toggle}
+        className="flex items-center justify-center size-10 rounded-sm hover:bg-white/10 transition-colors"
+        aria-label={`Switch to ${theme === "light" ? "dark" : "light"} theme`}
+      >
+        {theme === "light" ? (
+          <Moon className="size-[18px]" />
+        ) : (
+          <Sun className="size-[18px]" />
+        )}
       </TooltipTrigger>
       <TooltipContent side="right" sideOffset={8}>
         {theme === "light" ? "Dark Theme" : "Light Theme"}
