@@ -50,7 +50,17 @@ export function AIMessage({
         {citations.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {citations.map((cite, i) => (
-              <Badge key={i} variant="outline" className="text-[10px] cursor-pointer hover:bg-accent">
+              <Badge
+                key={i}
+                variant="outline"
+                className="text-[10px] cursor-pointer hover:bg-accent transition-colors"
+                onClick={() => {
+                  const el = document.querySelector(`[data-message-id="${id}"]`)
+                  el?.scrollIntoView({ behavior: "smooth", block: "center" })
+                  el?.classList.add("ring-2", "ring-primary", "ring-offset-2")
+                  setTimeout(() => el?.classList.remove("ring-2", "ring-primary", "ring-offset-2"), 2000)
+                }}
+              >
                 {cite.docName}, Hal {cite.page}
               </Badge>
             ))}
