@@ -45,7 +45,7 @@ export default function ChatPage() {
     onCommandPalette: () => setCommandOpen(true),
   })
 
-  const handleSend = useCallback(async (query: string, file?: FileAttachment) => {
+  const handleSend = useCallback(async (query: string, file?: FileAttachment, model?: string) => {
     addToHistory(query)
     const userMsg: Message = {
       id: crypto.randomUUID(),
@@ -61,6 +61,9 @@ export default function ChatPage() {
         body.fileName = file.name
         body.fileType = file.type
         body.fileData = file.base64
+      }
+      if (model) {
+        body.model = model
       }
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8787"}/api/rag/query`,

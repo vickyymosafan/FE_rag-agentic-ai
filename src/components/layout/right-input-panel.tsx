@@ -3,22 +3,32 @@
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Send, Paperclip, Loader2, X } from "lucide-react"
 import { useState } from "react"
 import { useFileUpload, type FileAttachment } from "@/lib/use-file-upload"
 
+type Model = "gemini" | "groq" | "cohere" | "openrouter"
+
 interface RightInputPanelProps {
-  onSend: (query: string, file?: FileAttachment) => void
+  onSend: (query: string, file?: FileAttachment, model?: string) => void
   isLoading: boolean
 }
 
 export function RightInputPanel({ onSend, isLoading }: RightInputPanelProps) {
   const [input, setInput] = useState("")
+  const [model, setModel] = useState<Model>("gemini")
   const { file, error, inputRef, selectFile, removeFile, handleFileChange } = useFileUpload()
 
   const handleSend = () => {
     if (!input.trim() || isLoading) return
-    onSend(input.trim(), file ?? undefined)
+    onSend(input.trim(), file ?? undefined, model)
     setInput("")
     removeFile()
   }
@@ -59,6 +69,17 @@ export function RightInputPanel({ onSend, isLoading }: RightInputPanelProps) {
             <Paperclip className="size-4" />
           </Button>
           <input ref={inputRef} type="file" accept=".pdf,.docx" className="hidden" onChange={handleFileChange} />
+          <Select value={model} onValueChange={(v) => setModel(v as Model)}>
+            <SelectTrigger className="h-8 w-[120px] text-[11px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="gemini" className="text-xs">Gemini 2.5 Pro</SelectItem>
+              <SelectItem value="groq" className="text-xs">Groq Llama 3</SelectItem>
+              <SelectItem value="cohere" className="text-xs">Cohere Command</SelectItem>
+              <SelectItem value="openrouter" className="text-xs">OpenRouter</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="secondary" className="text-[10px]">

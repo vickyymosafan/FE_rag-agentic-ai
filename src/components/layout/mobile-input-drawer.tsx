@@ -14,7 +14,7 @@ import { Send, MessageSquarePlus, Loader2, Paperclip, X } from "lucide-react"
 import { useFileUpload, type FileAttachment } from "@/lib/use-file-upload"
 
 interface MobileInputDrawerProps {
-  onSend: (query: string, file?: FileAttachment) => void
+  onSend: (query: string, file?: FileAttachment, model?: string) => void
   isLoading: boolean
 }
 
