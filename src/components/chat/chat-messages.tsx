@@ -25,6 +25,14 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
   return (
     <ScrollArea className="flex-1">
       <div className="flex flex-col gap-4 p-4">
+        {messages.length === 0 && !isLoading && (
+          <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground py-20">
+            <p className="text-sm">Tanyakan sesuatu tentang panduan akademik</p>
+            <p className="text-xs mt-1">
+              TA, KP, KKN, atau Kurikulum SI 2026
+            </p>
+          </div>
+        )}
         <AnimatePresence mode="popLayout">
           {messages.map((msg) =>
             msg.role === "user" ? (
@@ -32,6 +40,7 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
             ) : (
               <AIMessage
                 key={msg.id}
+                id={msg.id}
                 content={msg.content}
                 citations={msg.citations}
                 confidence={msg.confidence}

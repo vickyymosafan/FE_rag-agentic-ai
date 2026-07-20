@@ -11,8 +11,10 @@ import {
 import { ChevronDown } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
+import { MessageFeedback } from "./message-feedback"
 
 interface AIMessageProps {
+  id: string
   content: string
   citations?: { docName: string; page: number }[]
   confidence?: number
@@ -21,6 +23,7 @@ interface AIMessageProps {
 }
 
 export function AIMessage({
+  id,
   content,
   citations = [],
   confidence = 0,
@@ -73,10 +76,13 @@ export function AIMessage({
           </Collapsible>
         )}
 
-        <div className="flex items-center gap-3 text-[11px] text-muted-foreground pt-1 border-t">
-          <span>📄 {citations.length} sources</span>
-          <span>🎯 {confidence.toFixed(2)}</span>
-          <span>⚡ Gemini 2.5 Flash</span>
+        <div className="flex items-center justify-between pt-1 border-t">
+          <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+            <span>📄 {citations.length} sources</span>
+            <span>🎯 {confidence.toFixed(2)}</span>
+            <span>⚡ Gemini 2.5 Flash</span>
+          </div>
+          <MessageFeedback messageId={id} />
         </div>
       </Card>
     </motion.div>

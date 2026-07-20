@@ -99,9 +99,18 @@ export function AppSidebar() {
           </TabsContent>
 
           <TabsContent value="search" className="flex-1 px-2">
-            <div className="text-xs text-muted-foreground p-2">
-              Search across documents...
-            </div>
+            <input
+              type="text"
+              placeholder="Search documents..."
+              className="w-full px-2 py-1.5 text-xs rounded-md border bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+              onFocus={() => {
+                const event = new KeyboardEvent("keydown", {
+                  metaKey: true,
+                  key: "k",
+                })
+                window.dispatchEvent(event)
+              }}
+            />
           </TabsContent>
 
           <TabsContent value="collections" className="flex-1 px-2">

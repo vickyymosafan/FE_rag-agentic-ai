@@ -5,6 +5,7 @@ import { ChatMessages } from "@/components/chat/chat-messages"
 import { RightInputPanel } from "@/components/layout/right-input-panel"
 import { MobileInputDrawer } from "@/components/layout/mobile-input-drawer"
 import { CommandPalette } from "@/components/layout/command-palette"
+import { ErrorBoundary } from "@/components/layout/error-boundary"
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -86,6 +87,7 @@ export default function ChatPage() {
   }, [])
 
   return (
+    <ErrorBoundary>
     <div className="flex flex-col h-full">
       <div className="flex items-center h-12 px-4 border-b">
         <SidebarTrigger className="md:hidden" />
@@ -119,5 +121,6 @@ export default function ChatPage() {
 
       <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
     </div>
+    </ErrorBoundary>
   )
 }
