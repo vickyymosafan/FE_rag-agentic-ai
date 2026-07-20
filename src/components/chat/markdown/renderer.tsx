@@ -30,7 +30,7 @@ function CodeBlock({ className, children }: { className?: string; children?: Rea
           {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
         </Button>
       </div>
-      <pre className="bg-muted/50 p-4 rounded-b-lg overflow-x-auto text-sm leading-relaxed">
+      <pre className="bg-[#1e1e1e] p-4 rounded-b-lg overflow-x-auto text-[13px] font-mono leading-[1.6]">
         <code className={className}>{children}</code>
       </pre>
     </div>
@@ -71,11 +71,11 @@ export function MarkdownRenderer({ content }: { content: string }) {
       const { createHighlighter, createJavaScriptRegexEngine } = await import("shiki")
       const { default: rehypeShikiFromHighlighter } = await import("@shikijs/rehype/core")
       const highlighter = await createHighlighter({
-        themes: ["github-dark"],
+        themes: ["dark-plus"],
         langs: ["javascript", "typescript", "python", "bash", "json", "sql", "html", "css", "xml", "text"],
         engine: createJavaScriptRegexEngine(),
       })
-      shikiPlugin = rehypeShikiFromHighlighter(highlighter, { theme: "github-dark" })
+      shikiPlugin = rehypeShikiFromHighlighter(highlighter, { theme: "dark-plus" })
       setReady(true)
     })()
   }, [])

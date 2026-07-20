@@ -4,26 +4,34 @@ import { createContext, useContext, useEffect, useState } from "react"
 
 type Theme = "light" | "dark"
 
-const ThemeContext = createContext<{
+interface ThemeContextValue {
   theme: Theme
   toggle: () => void
   prefersReducedMotion: boolean
-}>({ theme: "light", toggle: () => {}, prefersReducedMotion: false })
+}
+
+const ThemeContext = createContext<ThemeContextValue>({
+  theme: "dark",
+  toggle: () => {},
+  prefersReducedMotion: false,
+})
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("light")
+  const [theme, setTheme] = useState<Theme>("dark")
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     const stored = localStorage.getItem("theme") as Theme | null
-    if (stored) {
-      setTheme(stored)
-      document.documentElement.classList.toggle("dark", stored === "dark")
-    }
+    const initial = stored ?? "dark"
+    setTheme(initial)
+    document.documentElement.classList.toggle("dark", initial === "dark")
+    setMounted(true)
 
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)")
     setPrefersReducedMotion(mq.matches)
-    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches)
+    const handler = (e: MediaQueryListEvent) =>
+      setPrefersReducedMotion(e.matches)
     mq.addEventListener("change", handler)
     return () => mq.removeEventListener("change", handler)
   }, [])
@@ -33,6 +41,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setTheme(next)
     localStorage.setItem("theme", next)
     document.documentElement.classList.toggle("dark", next === "dark")
+  }
+
+  if (!mounted) {
+    return <>{children}</>
   }
 
   return (

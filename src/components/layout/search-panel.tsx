@@ -1,63 +1,84 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { FileText, Search } from "lucide-react"
+import { useState } from "react";
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
-const documents = [
-  { name: "Panduan TA SI 2026", match: "ta tugas akhir skripsi" },
-  { name: "Panduan KP SI 2026", match: "kp kerja praktek magang" },
-  { name: "Panduan KKN SI 2026", match: "kkn kuliah kerja nyata" },
-  { name: "Kurikulum SI 2026", match: "kurikulum mata kuliah semester" },
-  { name: "Form Pendaftaran TA", match: "form pendaftaran ta tugas akhir" },
-  { name: "Form Bimbingan KP", match: "form bimbingan kp kerja praktek" },
-]
+const MOCK_RESULTS = [
+  {
+    doc: "Panduan TA SI 2026",
+    matches: ["Proposal TA", "Batas waktu pengumpulan TA"],
+  },
+  {
+    doc: "Kurikulum Inti",
+    matches: ["Mata kuliah wajib TA", "SKS minimum TA"],
+  },
+];
 
 export function SearchPanel() {
-  const [query, setQuery] = useState("")
-
-  const filtered = query
-    ? documents.filter(
-        (d) =>
-          d.name.toLowerCase().includes(query.toLowerCase()) ||
-          d.match.includes(query.toLowerCase())
-      )
-    : []
+  const [query, setQuery] = useState("");
+  const [caseSensitive, setCaseSensitive] = useState(false);
+  const [wholeWord, setWholeWord] = useState(false);
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="relative px-2 pb-2">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-3 text-muted-foreground" />
-        <input
-          type="text"
-          placeholder="Search documents..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="w-full pl-7 pr-2 py-1.5 text-xs rounded-md border bg-background focus:outline-none focus:ring-1 focus:ring-ring"
-          autoFocus
-        />
-      </div>
-      <ScrollArea className="flex-1">
-        {query && filtered.length === 0 && (
-          <p className="text-xs text-muted-foreground px-2">
-            No documents found
-          </p>
-        )}
-        {filtered.map((doc) => (
+    <div className="p-3 flex flex-col gap-3 h-full">
+      <div className="space-y-2">
+        <div className="relative">
+          <Search className="absolute left-2 top-1.5 h-3.5 w-3.5 text-muted-foreground" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search docs..."
+            className="h-7 pl-7 text-[12px] bg-background border-border"
+          />
+        </div>
+        <div className="flex items-center gap-1">
           <button
-            key={doc.name}
-            className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded-sm hover:bg-accent text-left"
+            onClick={() => setCaseSensitive(!caseSensitive)}
+            className={`px-1.5 py-0.5 text-[10px] rounded border ${caseSensitive ? 'bg-tab-active border-blue-500' : 'bg-transparent border-transparent hover:bg-accent'}`}
+            title="Match Case"
           >
-            <FileText className="size-3 shrink-0 text-muted-foreground" />
-            <span className="truncate">{doc.name}</span>
+            Aa
           </button>
-        ))}
-        {!query && (
-          <p className="text-xs text-muted-foreground px-2 pt-1">
-            Ketik untuk mencari dokumen akademik
-          </p>
+          <button
+            onClick={() => setWholeWord(!wholeWord)}
+            className={`px-1.5 py-0.5 text-[10px] rounded border ${wholeWord ? 'bg-tab-active border-blue-500' : 'bg-transparent border-transparent hover:bg-accent'}`}
+            title="Match Whole Word"
+          >
+            W
+          </button>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto">
+        {!query ? (
+          <div className="text-[11px] text-muted-foreground text-center mt-4">
+            Type to search across documents
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-medium text-sidebar-foreground/70">Results</span>
+              <Badge variant="secondary" className="text-[9px] h-4 px-1">
+                {MOCK_RESULTS.length} docs
+              </Badge>
+            </div>
+            {MOCK_RESULTS.map((res, i) => (
+              <div key={i} className="space-y-1">
+                <div className="text-[11px] font-semibold text-sidebar-foreground/90 truncate">
+                  {res.doc}
+                </div>
+                {res.matches.map((match, j) => (
+                  <div key={j} className="text-[12px] text-muted-foreground pl-3 border-l border-border/50 truncate hover:bg-accent cursor-pointer px-2 py-0.5">
+                    {match}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         )}
-      </ScrollArea>
+      </div>
     </div>
-  )
+  );
 }

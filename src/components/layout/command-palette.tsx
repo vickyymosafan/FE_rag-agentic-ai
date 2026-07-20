@@ -1,5 +1,10 @@
-"use client"
+"use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useTheme } from "@/components/layout/theme-provider";
+import { useSidebar } from "@/components/ui/sidebar";
+import { useChat } from "@/lib/chat-context";
 import {
   CommandDialog,
   CommandEmpty,
@@ -7,59 +12,85 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command"
-import { useRouter } from "next/navigation"
-import {
-  MessageSquare,
-  FileText,
-  Search,
-  LogIn,
-  BarChart3,
-} from "lucide-react"
+  CommandSeparator,
+} from "@/components/ui/command";
+import { FileText, MessageSquare, Plus, Trash, PanelLeft, PanelRight, Moon, Sun, Settings, User } from "lucide-react";
 
-interface CommandPaletteProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}
+export function CommandPalette() {
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
+  const { toggle, theme } = useTheme();
+  const { toggleSidebar } = useSidebar();
+  const { createSession, clearMessages, rightPanelCollapsed, setRightPanelCollapsed } = useChat();
 
-export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
-  const router = useRouter()
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setOpen((open) => !open);
+      }
+    };
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
 
-  const run = (action: () => void) => {
-    action()
-    onOpenChange(false)
-  }
+  const runCommand = (command: () => void) => {
+    setOpen(false);
+    command();
+  };
 
   return (
-    <CommandDialog open={open} onOpenChange={onOpenChange}>
+    <CommandDialog open={open} onOpenChange={setOpen}>
       <CommandInput placeholder="Type a command or search..." />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
+        
         <CommandGroup heading="Navigation">
-          <CommandItem onSelect={() => run(() => router.push("/chat"))}>
-            <MessageSquare className="size-4 mr-2" />
-            <span>Go to Chat</span>
+          <CommandItem onSelect={() => runCommand(() => router.push("/"))}>
+            <MessageSquare className="mr-2 h-4 w-4" />
+            <span>Chat</span>
           </CommandItem>
-          <CommandItem onSelect={() => run(() => router.push("/login"))}>
-            <LogIn className="size-4 mr-2" />
-            <span>Go to Login</span>
-          </CommandItem>
-          <CommandItem onSelect={() => run(() => router.push("/admin/documents"))}>
-            <FileText className="size-4 mr-2" />
-            <span>Manage Documents</span>
-          </CommandItem>
-          <CommandItem onSelect={() => run(() => router.push("/admin/usage"))}>
-            <BarChart3 className="size-4 mr-2" />
-            <span>View Usage</span>
+          <CommandItem onSelect={() => runCommand(() => router.push("/docs"))}>
+            <FileText className="mr-2 h-4 w-4" />
+            <span>Documents</span>
           </CommandItem>
         </CommandGroup>
-        <CommandGroup heading="Actions">
-          <CommandItem onSelect={() => run(() => document.querySelector<HTMLTextAreaElement>("textarea")?.focus())}>
-            <Search className="size-4 mr-2" />
-            <span>Focus Query Input</span>
+
+        <CommandSeparator />
+        
+        <CommandGroup heading="Chat">
+          <CommandItem onSelect={() => runCommand(() => createSession())}>
+            <Plus className="mr-2 h-4 w-4" />
+            <span>New Chat</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => clearMessages())}>
+            <Trash className="mr-2 h-4 w-4" />
+            <span>Clear Chat</span>
+          </CommandItem>
+        </CommandGroup>
+
+        <CommandSeparator />
+        
+        <CommandGroup heading="View">
+          <CommandItem onSelect={() => runCommand(() => toggleSidebar())}>
+            <PanelLeft className="mr-2 h-4 w-4" />
+            <span>Toggle Sidebar</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => setRightPanelCollapsed(!rightPanelCollapsed))}>
+            <PanelRight className="mr-2 h-4 w-4" />
+            <span>Toggle Right Panel</span>
+          </CommandItem>
+        </CommandGroup>
+
+        <CommandSeparator />
+        
+        <CommandGroup heading="Theme">
+          <CommandItem onSelect={() => runCommand(() => toggle())}>
+            {theme === 'dark' ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
+            <span>Toggle Dark Mode</span>
           </CommandItem>
         </CommandGroup>
       </CommandList>
     </CommandDialog>
-  )
+  );
 }

@@ -1,78 +1,55 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Button } from "@/components/ui/button"
-import { History, Trash2, MessageSquare } from "lucide-react"
-
-interface HistoryItem {
-  query: string
-  time: string
-  id: string
-}
+import { useChat } from "@/lib/chat-context";
+import { MessageSquare, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export function ChatHistory() {
-  const [items, setItems] = useState<HistoryItem[]>([])
+  const { sessions, activeSessionId, switchSession, closeSession } = useChat();
 
-  useEffect(() => {
-    const stored = localStorage.getItem("chatHistory")
-    if (stored) {
-      try {
-        setItems(JSON.parse(stored))
-      } catch {}
-    }
-  }, [])
-
-  const clearAll = () => {
-    setItems([])
-    localStorage.removeItem("chatHistory")
+  if (sessions.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-4 text-center opacity-70">
+        <MessageSquare className="w-8 h-8 mb-3 opacity-50" />
+        <p className="text-[12px] text-sidebar-foreground">No chat history</p>
+        <p className="text-[10px] text-muted-foreground mt-1">Start a new conversation</p>
+      </div>
+    );
   }
 
+  // Simplified grouping for now (all in one list or just render sessions)
   return (
-    <div className="flex flex-col h-full">
-      {items.length > 0 && (
-        <div className="flex items-center justify-between px-2 pb-1">
-          <span className="text-[10px] text-muted-foreground">{items.length} queries</span>
-          <Button variant="ghost" size="icon" className="size-5" onClick={clearAll} title="Clear history">
-            <Trash2 className="size-3" />
-          </Button>
-        </div>
-      )}
-      <ScrollArea className="flex-1">
-        {items.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-8 text-muted-foreground">
-            <MessageSquare className="size-6" />
-            <p className="text-xs">Belum ada riwayat percakapan</p>
-            <p className="text-[10px]">Tanyakan sesuatu untuk memulai</p>
+    <div className="py-2">
+      <div className="px-3 py-1 text-[11px] font-semibold text-sidebar-foreground/50 uppercase">
+        Recent
+      </div>
+      <div className="flex flex-col mt-1">
+        {sessions.map((session) => (
+          <div
+            key={session.id}
+            className={cn(
+              "group flex items-center justify-between px-3 py-1.5 cursor-pointer text-[12px] vscode-hover transition-colors",
+              activeSessionId === session.id ? "vscode-selected text-tab-active-foreground" : "text-sidebar-foreground"
+            )}
+            onClick={() => switchSession(session.id)}
+          >
+            <div className="flex items-center gap-2 truncate">
+              <MessageSquare className="w-3.5 h-3.5 opacity-70 shrink-0" />
+              <span className="truncate">{session.title}</span>
+            </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                closeSession(session.id);
+              }}
+              className="opacity-0 group-hover:opacity-100 p-0.5 rounded-md hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
           </div>
-        ) : (
-          <div className="space-y-0.5 px-1">
-            {items.map((item) => (
-              <button
-                key={item.id}
-                className="flex items-start gap-2 w-full px-2 py-1.5 text-xs rounded-sm hover:bg-accent text-left"
-              >
-                <History className="size-3 shrink-0 mt-0.5 text-muted-foreground" />
-                <div className="min-w-0">
-                  <p className="truncate">{item.query}</p>
-                  <p className="text-[10px] text-muted-foreground">{item.time}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-      </ScrollArea>
+        ))}
+      </div>
     </div>
-  )
-}
-
-export function addToHistory(query: string) {
-  const stored = localStorage.getItem("chatHistory")
-  const items: HistoryItem[] = stored ? JSON.parse(stored) : []
-  items.unshift({
-    id: crypto.randomUUID(),
-    query,
-    time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
-  })
-  localStorage.setItem("chatHistory", JSON.stringify(items.slice(0, 50)))
+  );
 }

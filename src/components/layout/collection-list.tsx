@@ -1,59 +1,106 @@
-"use client"
+"use client";
 
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Badge } from "@/components/ui/badge"
-import { Bookmark, GraduationCap, Briefcase, Users, BookOpen } from "lucide-react"
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "@/components/layout/theme-provider";
+import { GraduationCap, Briefcase, Users, BookOpen, ChevronRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
-const collections = [
+type Category = {
+  id: string;
+  name: string;
+  icon: React.ReactNode;
+  queries: string[];
+};
+
+const CATEGORIES: Category[] = [
   {
+    id: "ta",
     name: "Syarat Akademik",
-    icon: GraduationCap,
-    queries: ["Syarat pendaftaran TA", "IPK minimal", "SKS yang harus ditempuh"],
+    icon: <GraduationCap className="w-4 h-4" />,
+    queries: ["Syarat daftar TA", "Format proposal TA", "Batas SKS TA"]
   },
   {
+    id: "kp",
     name: "Panduan KP",
-    icon: Briefcase,
-    queries: ["Cara daftar KP", "Syarat KP semester genap", "Format laporan KP"],
+    icon: <Briefcase className="w-4 h-4" />,
+    queries: ["Syarat daftar KP", "Logbook KP", "Seminar KP"]
   },
   {
+    id: "kkn",
     name: "Panduan KKN",
-    icon: Users,
-    queries: ["Jadwal KKN 2026", "Syarat KKN", "Lokasi KKN"],
+    icon: <Users className="w-4 h-4" />,
+    queries: ["Syarat SKS KKN", "Jadwal KKN", "Laporan KKN"]
   },
   {
+    id: "kurikulum",
     name: "Kurikulum",
-    icon: BookOpen,
-    queries: ["Mata kuliah semester 1", "Struktur kurikulum", "Mata kuliah pilihan"],
-  },
-]
+    icon: <BookOpen className="w-4 h-4" />,
+    queries: ["Mata kuliah wajib", "SKS kelulusan", "Mata kuliah pilihan"]
+  }
+];
 
-export function CollectionList() {
+export function CollectionList({ onQuerySelect }: { onQuerySelect: (q: string) => void }) {
   return (
-    <ScrollArea className="h-full">
-      <div className="space-y-2 px-2">
-        {collections.map((col) => {
-          const Icon = col.icon
-          return (
-            <div key={col.name}>
-              <div className="flex items-center gap-1.5 py-1">
-                <Icon className="size-3.5 text-muted-foreground" />
-                <span className="text-xs font-medium">{col.name}</span>
-              </div>
-              <div className="flex flex-wrap gap-1 pl-5">
-                {col.queries.map((q) => (
-                  <Badge
-                    key={q}
-                    variant="secondary"
-                    className="text-[10px] cursor-pointer hover:bg-accent"
-                  >
-                    {q}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )
-        })}
+    <div className="py-2 space-y-1">
+      {CATEGORIES.map(cat => (
+        <CollectionItem key={cat.id} category={cat} onQuerySelect={onQuerySelect} />
+      ))}
+    </div>
+  );
+}
+
+function CollectionItem({ category, onQuerySelect }: { category: Category, onQuerySelect: (q: string) => void }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const { prefersReducedMotion } = useTheme();
+
+  return (
+    <div>
+      <div
+        className="flex items-center px-3 py-1.5 cursor-pointer vscode-hover text-sidebar-foreground group"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <motion.div
+          animate={{ rotate: isOpen ? 90 : 0 }}
+          transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
+          className="mr-1 opacity-70 group-hover:opacity-100"
+        >
+          <ChevronRight className="w-3.5 h-3.5" />
+        </motion.div>
+        <div className="mr-2 opacity-70 group-hover:opacity-100">{category.icon}</div>
+        <span className="text-[12px] font-medium flex-1 truncate">{category.name}</span>
+        <Badge variant="secondary" className="text-[9px] h-4 px-1 bg-background/50">
+          {category.queries.length}
+        </Badge>
       </div>
-    </ScrollArea>
-  )
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={prefersReducedMotion ? false : { height: 0, opacity: 0 }}
+            animate={prefersReducedMotion ? false : { height: "auto", opacity: 1 }}
+            exit={prefersReducedMotion ? false : { height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="pl-9 pr-3 pb-2 pt-1 flex flex-wrap gap-1.5">
+              {category.queries.map((q, i) => (
+                <Badge
+                  key={i}
+                  variant="outline"
+                  className="text-[10px] cursor-pointer hover:bg-accent font-normal text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onQuerySelect(q);
+                  }}
+                >
+                  {q}
+                </Badge>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
 }

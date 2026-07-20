@@ -1,89 +1,94 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer"
-import { Send, MessageSquarePlus, Loader2, Paperclip, X } from "lucide-react"
-import { useFileUpload, type FileAttachment } from "@/lib/use-file-upload"
+import { useState, useRef } from "react";
+import { Drawer, DrawerContent, DrawerTrigger, DrawerTitle } from "@/components/ui/drawer";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { MessageSquare, Paperclip, Send, X, File, Sparkles } from "lucide-react";
 
-interface MobileInputDrawerProps {
-  onSend: (query: string, file?: FileAttachment, model?: string) => void
-  isLoading: boolean
-}
+const SUGGESTIONS = [
+  "Syarat daftar TA",
+  "Format proposal KP",
+  "Batas SKS KKN",
+  "Mata kuliah wajib"
+];
 
-export function MobileInputDrawer({ onSend, isLoading }: MobileInputDrawerProps) {
-  const [input, setInput] = useState("")
-  const [open, setOpen] = useState(false)
-  const { file, error, inputRef, selectFile, removeFile, handleFileChange } = useFileUpload()
+export function MobileInputDrawer({ onSend, isLoading }: { onSend: (q: string, f?: File) => void, isLoading?: boolean }) {
+  const [open, setOpen] = useState(false);
+  const [input, setInput] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSend = () => {
-    if (!input.trim() || isLoading) return
-    onSend(input.trim(), file ?? undefined)
-    setInput("")
-    removeFile()
-    setOpen(false)
-  }
+    if (!input.trim() && !file) return;
+    onSend(input, file || undefined);
+    setInput("");
+    setFile(null);
+    setOpen(false);
+  };
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger className="fixed bottom-6 right-6 size-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90 flex items-center justify-center">
-        <MessageSquarePlus className="size-6" />
+      <DrawerTrigger asChild>
+        <Button className="fixed bottom-6 right-6 h-12 w-12 rounded-full shadow-xl bg-primary hover:bg-primary/90 z-50 md:hidden p-0">
+          <MessageSquare className="h-5 w-5 text-primary-foreground" />
+        </Button>
       </DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle className="text-sm">Ask RAG Academic</DrawerTitle>
-        </DrawerHeader>
-        <div className="p-4 pb-8 space-y-3">
+      <DrawerContent className="p-4 bg-background">
+        <DrawerTitle className="sr-only">Query Input</DrawerTitle>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <span className="text-[12px] font-semibold uppercase tracking-wider text-foreground">Ask AI</span>
+            <Badge variant="outline" className="text-[9px] h-4 px-1 flex gap-1 font-normal bg-accent">
+              <Sparkles className="w-2.5 h-2.5" /> Gemini
+            </Badge>
+          </div>
+        </div>
+        
+        <div className="flex overflow-x-auto gap-2 pb-3 mb-1 no-scrollbar">
+          {SUGGESTIONS.map(s => (
+            <Badge
+              key={s}
+              variant="outline"
+              className="text-[11px] whitespace-nowrap cursor-pointer hover:bg-accent font-normal py-1"
+              onClick={() => { setInput(s); setOpen(false); onSend(s); }}
+            >
+              {s}
+            </Badge>
+          ))}
+        </div>
+
+        {file && (
+          <div className="mb-3 p-2 bg-accent/50 border border-border rounded-md flex items-center justify-between">
+            <div className="flex items-center gap-2 truncate">
+              <File className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+              <span className="text-[12px] truncate">{file.name}</span>
+            </div>
+            <button onClick={() => setFile(null)} className="p-1 hover:bg-background rounded-sm">
+              <X className="w-3.5 h-3.5 text-muted-foreground" />
+            </button>
+          </div>
+        )}
+
+        <div className="relative bg-background rounded-md border border-border focus-within:ring-1 focus-within:ring-ring flex flex-col shadow-sm">
           <Textarea
-            placeholder="Ask about TA/KP/KKN/Kurikulum..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-                handleSend()
-              }
-            }}
-            className="min-h-[100px] resize-none"
-            disabled={isLoading}
-            autoFocus
+            placeholder="Tanyakan sesuatu..."
+            className="min-h-[80px] resize-none border-0 focus-visible:ring-0 text-[13px] p-3 bg-transparent"
           />
-          {file && (
-            <div className="flex items-center gap-2 px-2 py-1 rounded-md bg-muted text-xs">
-              <Paperclip className="size-3 text-muted-foreground" />
-              <span className="truncate">{file.name}</span>
-              <Button variant="ghost" size="icon" className="size-4 ml-auto" onClick={removeFile}>
-                <X className="size-3" />
-              </Button>
-            </div>
-          )}
-          {error && <p className="text-[10px] text-destructive">{error}</p>}
-          <div className="flex gap-2">
-            <Button variant="outline" size="icon" onClick={selectFile} disabled={isLoading}>
-              <Paperclip className="size-4" />
+          <div className="flex items-center justify-between p-2 border-t border-border bg-muted/20">
+            <input type="file" ref={fileInputRef} className="hidden" onChange={e => setFile(e.target.files?.[0] || null)} />
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => fileInputRef.current?.click()}>
+              <Paperclip className="h-4 w-4" />
             </Button>
-            <input ref={inputRef} type="file" accept=".pdf,.docx" className="hidden" onChange={handleFileChange} />
-            <Button
-              className="flex-1 gap-2"
-              onClick={handleSend}
-              disabled={isLoading || !input.trim()}
-            >
-              {isLoading ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <Send className="size-4" />
-              )}
-              {isLoading ? "Thinking..." : "Send"}
+            <Button size="icon" className="h-8 w-8 rounded-md bg-blue-600 hover:bg-blue-700 text-white" disabled={isLoading || (!input.trim() && !file)} onClick={handleSend}>
+              <Send className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>
       </DrawerContent>
     </Drawer>
-  )
+  );
 }

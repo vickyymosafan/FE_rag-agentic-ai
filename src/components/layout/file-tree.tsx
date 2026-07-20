@@ -1,117 +1,145 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { ChevronRight, FileText, File, FolderOpen, Folder } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "@/components/layout/theme-provider";
+import { ChevronRight, FileText, FileSpreadsheet, Folder, FolderOpen } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-interface TreeNode {
-  name: string
-  type: "file" | "folder"
-  children?: TreeNode[]
-  icon?: string
+type Node = {
+  id: string;
+  name: string;
+  type: "file" | "folder";
+  ext?: "pdf" | "docx";
+  children?: Node[];
+};
+
+const treeData: Node[] = [
+  { id: "1", name: "Panduan TA SI 2026", type: "file", ext: "pdf" },
+  { id: "2", name: "Panduan KP SI 2026", type: "file", ext: "pdf" },
+  { id: "3", name: "Panduan KKN SI 2026", type: "file", ext: "pdf" },
+  {
+    id: "4", name: "Kurikulum SI 2026", type: "folder", children: [
+      { id: "4-1", name: "Kurikulum Inti.pdf", type: "file", ext: "pdf" },
+      { id: "4-2", name: "Mata Kuliah Pilihan.pdf", type: "file", ext: "pdf" },
+      { id: "4-3", name: "Struktur Kurikulum.pdf", type: "file", ext: "pdf" },
+    ]
+  },
+  {
+    id: "5", name: "Formulir Akademik", type: "folder", children: [
+      { id: "5-1", name: "Form Pendaftaran TA.docx", type: "file", ext: "docx" },
+      { id: "5-2", name: "Form Bimbingan KP.docx", type: "file", ext: "docx" },
+    ]
+  }
+];
+
+export function FileTree() {
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+
+  return (
+    <div className="py-2">
+      {treeData.map((node) => (
+        <TreeItem
+          key={node.id}
+          node={node}
+          depth={0}
+          selectedFile={selectedFile}
+          onSelect={setSelectedFile}
+        />
+      ))}
+    </div>
+  );
 }
-
-const documentTree: TreeNode[] = [
-  {
-    name: "Panduan TA SI 2026",
-    type: "file",
-    icon: "📄",
-  },
-  {
-    name: "Panduan KP SI 2026",
-    type: "file",
-    icon: "📄",
-  },
-  {
-    name: "Panduan KKN SI 2026",
-    type: "file",
-    icon: "📄",
-  },
-  {
-    name: "Kurikulum SI 2026",
-    type: "folder",
-    children: [
-      { name: "Kurikulum Inti.pdf", type: "file", icon: "📄" },
-      { name: "Mata Kuliah Pilihan.pdf", type: "file", icon: "📄" },
-      { name: "Struktur Kurikulum.pdf", type: "file", icon: "📄" },
-    ],
-  },
-  {
-    name: "Formulir Akademik",
-    type: "folder",
-    children: [
-      { name: "Form Pendaftaran TA.docx", type: "file", icon: "📝" },
-      { name: "Form Bimbingan KP.docx", type: "file", icon: "📝" },
-    ],
-  },
-]
 
 function TreeItem({
   node,
-  depth = 0,
+  depth,
+  selectedFile,
+  onSelect
 }: {
-  node: TreeNode
-  depth?: number
+  node: Node;
+  depth: number;
+  selectedFile: string | null;
+  onSelect: (id: string) => void;
 }) {
-  const [isOpen, setIsOpen] = useState(false)
-  const isFolder = node.type === "folder"
+  const [isOpen, setIsOpen] = useState(false);
+  const { prefersReducedMotion } = useTheme();
+
+  const isFolder = node.type === "folder";
+  const isSelected = selectedFile === node.id;
+
+  const handleClick = () => {
+    if (isFolder) {
+      setIsOpen(!isOpen);
+    } else {
+      onSelect(node.id);
+    }
+  };
+
+  const Icon = () => {
+    if (isFolder) {
+      return isOpen ? (
+        <FolderOpen className="w-3.5 h-3.5 mr-1 text-sidebar-foreground/70" />
+      ) : (
+        <Folder className="w-3.5 h-3.5 mr-1 text-sidebar-foreground/70" />
+      );
+    }
+    if (node.ext === "pdf") {
+      return <FileText className="w-3.5 h-3.5 mr-1 text-red-400" />;
+    }
+    if (node.ext === "docx") {
+      return <FileSpreadsheet className="w-3.5 h-3.5 mr-1 text-blue-400" />;
+    }
+    return <FileText className="w-3.5 h-3.5 mr-1 text-sidebar-foreground/70" />;
+  };
 
   return (
     <div>
-      <button
-        onClick={() => isFolder && setIsOpen(!isOpen)}
+      <div
+        onClick={handleClick}
         className={cn(
-          "flex items-center gap-1.5 w-full px-2 py-1 text-xs rounded-sm hover:bg-accent text-left",
-          depth > 0 && "pl-8"
+          "flex items-center px-2 py-1 cursor-pointer select-none text-[12px] group vscode-hover transition-colors",
+          isSelected ? "vscode-selected text-tab-active-foreground font-medium" : "text-sidebar-foreground",
+          depth > 0 && "indent-guide relative"
         )}
+        style={{ paddingLeft: `${depth * 16 + 8}px` }}
       >
-        {isFolder ? (
-          <motion.div
-            animate={{ rotate: isOpen ? 90 : 0 }}
-            transition={{ duration: 0.15 }}
-          >
-            <ChevronRight className="size-3 shrink-0 text-muted-foreground" />
-          </motion.div>
-        ) : (
-          <span className="w-3 shrink-0" />
-        )}
-        {isFolder ? (
-          isOpen ? (
-            <FolderOpen className="size-3.5 shrink-0 text-muted-foreground" />
-          ) : (
-            <Folder className="size-3.5 shrink-0 text-muted-foreground" />
-          )
-        ) : (
-          <span className="text-xs">{node.icon ?? "📄"}</span>
-        )}
+        <span className="w-4 h-4 flex items-center justify-center opacity-80 group-hover:opacity-100 shrink-0">
+          {isFolder && (
+            <motion.div
+              animate={{ rotate: isOpen ? 90 : 0 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </motion.div>
+          )}
+        </span>
+        <Icon />
         <span className="truncate">{node.name}</span>
-      </button>
-      <AnimatePresence>
-        {isOpen && node.children && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="overflow-hidden"
-          >
-            {node.children.map((child, i) => (
-              <TreeItem key={i} node={child} depth={depth + 1} />
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  )
-}
+      </div>
 
-export function FileTree() {
-  return (
-    <div className="space-y-0.5">
-      {documentTree.map((node, i) => (
-        <TreeItem key={i} node={node} />
-      ))}
+      {isFolder && node.children && (
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={prefersReducedMotion ? false : { height: 0, opacity: 0 }}
+              animate={prefersReducedMotion ? false : { height: "auto", opacity: 1 }}
+              exit={prefersReducedMotion ? false : { height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              {node.children.map((child) => (
+                <TreeItem
+                  key={child.id}
+                  node={child}
+                  depth={depth + 1}
+                  selectedFile={selectedFile}
+                  onSelect={onSelect}
+                />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
     </div>
-  )
+  );
 }

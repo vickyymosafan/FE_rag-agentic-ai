@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { Toaster } from "@/components/ui/sonner"
 import { SessionProvider } from "next-auth/react"
+import { ChatProvider } from "@/lib/chat-context"
 import { useState } from "react"
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -13,10 +14,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider delay={0}>
-          <SidebarProvider>{children}</SidebarProvider>
-          <Toaster />
-        </TooltipProvider>
+        <ChatProvider>
+          <TooltipProvider delayDuration={0}>
+            <SidebarProvider>{children}</SidebarProvider>
+            <Toaster />
+          </TooltipProvider>
+        </ChatProvider>
       </QueryClientProvider>
     </SessionProvider>
   )

@@ -1,28 +1,34 @@
 "use client"
 
-import { motion } from "framer-motion"
 import { Sun, Moon } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { useTheme } from "./theme-provider"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 export function ThemeToggle() {
   const { theme, toggle } = useTheme()
 
   return (
-    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="size-7"
-        onClick={toggle}
-        title={`Switch to ${theme === "light" ? "dark" : "light"} theme`}
-      >
-        {theme === "light" ? (
-          <Moon className="size-3.5" />
-        ) : (
-          <Sun className="size-3.5" />
-        )}
-      </Button>
-    </motion.div>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          onClick={toggle}
+          className="flex items-center justify-center size-10 rounded-sm hover:bg-white/10 transition-colors"
+          aria-label={`Switch to ${theme === "light" ? "dark" : "light"} theme`}
+        >
+          {theme === "light" ? (
+            <Moon className="size-[18px]" />
+          ) : (
+            <Sun className="size-[18px]" />
+          )}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="right" sideOffset={8}>
+        {theme === "light" ? "Dark Theme" : "Light Theme"}
+      </TooltipContent>
+    </Tooltip>
   )
 }
