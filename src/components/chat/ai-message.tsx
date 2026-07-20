@@ -3,6 +3,7 @@
 import { motion } from "framer-motion"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { useTheme } from "@/components/layout/theme-provider"
 import {
   Collapsible,
   CollapsibleContent,
@@ -29,11 +30,14 @@ export function AIMessage({
   asiScore = 0,
   reasoningPath = [],
 }: AIMessageProps) {
+  const { prefersReducedMotion } = useTheme()
+  const time = new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+
   return (
     <motion.div
-      layout
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
+      layout={!prefersReducedMotion}
+      initial={prefersReducedMotion ? undefined : { opacity: 0, y: 16 }}
+      animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
       className="mr-auto max-w-[80%]"
     >
       <Card className="rounded-2xl rounded-tl-sm p-4 space-y-3">
@@ -90,6 +94,9 @@ export function AIMessage({
             <span>⚡ Gemini 2.5 Flash</span>
           </div>
           <MessageFeedback messageId={id} />
+        </div>
+        <div className="text-right">
+          <span className="text-[10px] text-muted-foreground">{time}</span>
         </div>
       </Card>
     </motion.div>

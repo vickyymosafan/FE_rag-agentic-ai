@@ -7,6 +7,7 @@ import { MobileInputDrawer } from "@/components/layout/mobile-input-drawer"
 import { CommandPalette } from "@/components/layout/command-palette"
 import { ErrorBoundary } from "@/components/layout/error-boundary"
 import { addToHistory } from "@/components/layout/chat-history"
+import { client } from "@/lib/hono-client"
 import type { FileAttachment } from "@/lib/use-file-upload"
 import { useChatStats } from "@/lib/chat-stats-context"
 import {
@@ -46,6 +47,7 @@ export default function ChatPage() {
 
   useKeyboardShortcuts({
     onCommandPalette: () => setCommandOpen(true),
+    onCloseChat: () => setMessages([]),
   })
 
   const handleSend = useCallback(async (query: string, file?: FileAttachment, model?: string) => {
@@ -68,14 +70,12 @@ export default function ChatPage() {
       if (model) {
         body.model = model
       }
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8787"}/api/rag/query`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        }
-      )
+      const proxyUrl = process.env.NEXT_PUBLIC_PROXY_URL ?? "/api/rag/query"
+      const res = await fetch(proxyUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      })
       const data = await res.json()
 
       const confidence = data.confidence ?? 0
