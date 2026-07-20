@@ -1,19 +1,41 @@
 "use client"
 
-import { Badge } from "@/components/ui/badge"
+import { useSession } from "next-auth/react"
 
-export function StatusBar() {
+interface StatusBarProps {
+  asiScore?: number
+  model?: string
+  sources?: number
+  confidence?: number
+  cacheHit?: boolean
+}
+
+export function StatusBar({
+  asiScore = 0,
+  model = "Gemini 2.5 Flash",
+  sources = 0,
+  confidence = 0,
+  cacheHit = false,
+}: StatusBarProps) {
+  const { data: session } = useSession()
+
   return (
-    <div className="flex items-center justify-between h-6 px-3 text-[11px] text-muted-foreground bg-sidebar border-t select-none">
+    <div className="flex items-center justify-between h-6 px-3 text-[11px] text-white bg-[var(--status-bar)] select-none">
       <div className="flex items-center gap-3">
-        <Badge variant="outline" className="h-4 text-[10px] px-1 rounded-sm">
-          ASI 0.00
-        </Badge>
-        <span>⚡ Gemini 2.5 Flash</span>
+        <span className="font-medium">RAG Academic</span>
+        {session?.user?.name && (
+          <span className="opacity-80">
+            {session.user.name}
+            {session.user.role === "admin" && " (Admin)"}
+          </span>
+        )}
       </div>
       <div className="flex items-center gap-3">
-        <span>📄 0 sources</span>
-        <span>🎯 0.00</span>
+        <span>ASI {asiScore.toFixed(2)}</span>
+        <span>⚡ {model}</span>
+        <span>📄 {sources} sources</span>
+        <span>🎯 {confidence.toFixed(2)}</span>
+        {cacheHit && <span>⚡ Cache</span>}
       </div>
     </div>
   )

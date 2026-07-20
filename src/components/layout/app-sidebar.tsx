@@ -22,20 +22,9 @@ import {
   Search,
   FolderOpen,
   Settings,
-  ChevronDown,
 } from "lucide-react"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
-
-const documents = [
-  { name: "Panduan TA SI 2026", type: "PDF" },
-  { name: "Panduan KP SI 2026", type: "PDF" },
-  { name: "Panduan KKN SI 2026", type: "DOCX" },
-  { name: "Kurikulum SI 2026", type: "DOCX" },
-]
+import { FileTree } from "@/components/layout/file-tree"
+import { useSession } from "next-auth/react"
 
 const historyItems = [
   { query: "Syarat pendaftaran TA", time: "5m ago" },
@@ -45,6 +34,8 @@ const historyItems = [
 ]
 
 export function AppSidebar() {
+  const { data: session } = useSession()
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="flex-row items-center gap-2 px-3 py-2">
@@ -71,21 +62,12 @@ export function AppSidebar() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="files" className="flex-1 px-2">
+          <TabsContent value="files" className="flex-1 px-1">
             <ScrollArea className="h-full">
               <SidebarGroup>
                 <SidebarGroupLabel>Documents</SidebarGroupLabel>
                 <SidebarGroupContent>
-                  <SidebarMenu>
-                    {documents.map((doc) => (
-                      <SidebarMenuItem key={doc.name}>
-                        <SidebarMenuButton className="text-xs">
-                          <FileText className="size-3.5" />
-                          <span className="truncate">{doc.name}</span>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
+                  <FileTree />
                 </SidebarGroupContent>
               </SidebarGroup>
             </ScrollArea>
@@ -135,9 +117,13 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="sm">
               <Avatar className="size-5">
-                <AvatarFallback className="text-[10px]">U</AvatarFallback>
+                <AvatarFallback className="text-[10px]">
+                  {session?.user?.name?.charAt(0) ?? "U"}
+                </AvatarFallback>
               </Avatar>
-              <span className="text-xs">User</span>
+              <span className="text-xs truncate">
+                {session?.user?.name ?? "Guest"}
+              </span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

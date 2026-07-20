@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { ChatMessages } from "@/components/chat/chat-messages"
 import { RightInputPanel } from "@/components/layout/right-input-panel"
 import { MobileInputDrawer } from "@/components/layout/mobile-input-drawer"
+import { CommandPalette } from "@/components/layout/command-palette"
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -11,6 +12,7 @@ import {
 } from "@/components/ui/resizable"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts"
 
 interface Message {
   id: string
@@ -24,6 +26,7 @@ interface Message {
 
 export default function ChatPage() {
   const isMobile = useIsMobile()
+  const [commandOpen, setCommandOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -35,7 +38,11 @@ export default function ChatPage() {
   ])
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleSend = async (query: string) => {
+  useKeyboardShortcuts({
+    onCommandPalette: () => setCommandOpen(true),
+  })
+
+  const handleSend = useCallback(async (query: string) => {
     const userMsg: Message = {
       id: crypto.randomUUID(),
       role: "user",
@@ -76,13 +83,13 @@ export default function ChatPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
 
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center h-12 px-4 border-b">
         <SidebarTrigger className="md:hidden" />
-        <div className="text-xs text-muted-foreground ml-auto hidden sm:block">
+        <div className="text-[11px] text-muted-foreground ml-auto hidden sm:block">
           Panduan TA SI 2026 · Panduan KP SI 2026 · Panduan KKN SI 2026 · Kurikulum SI 2026
         </div>
       </div>
@@ -109,6 +116,8 @@ export default function ChatPage() {
           </ResizablePanel>
         </ResizablePanelGroup>
       )}
+
+      <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
     </div>
   )
 }
