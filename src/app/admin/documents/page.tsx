@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Upload, FileText, Trash2, Search } from "lucide-react"
+import { Upload, FileText, Trash2, Search, Pencil } from "lucide-react"
 import { toast } from "sonner"
 import { z } from "zod"
 
@@ -26,6 +26,44 @@ const initialDocuments: Document[] = [
   { id: "4", name: "Kurikulum SI 2026", type: "DOCX", pages: 17, chunks: 52, status: "indexed", uploadedAt: "2026-07-19" },
 ]
 
+function EditableName({ doc, onRename }: { doc: Document; onRename: (id: string, name: string) => void }) {
+  const [editing, setEditing] = useState(false)
+  const [value, setValue] = useState(doc.name)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const save = () => {
+    const trimmed = value.trim()
+    if (trimmed && trimmed !== doc.name) {
+      onRename(doc.id, trimmed)
+    } else {
+      setValue(doc.name)
+    }
+    setEditing(false)
+  }
+
+  if (editing) {
+    return (
+      <Input
+        ref={inputRef}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={save}
+        onKeyDown={(e) => { if (e.key === "Enter") { save() }; if (e.key === "Escape") { setValue(doc.name); setEditing(false) } }}
+        className="h-7 text-sm"
+        autoFocus
+      />
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-2 group cursor-pointer" onClick={() => setEditing(true)}>
+      <FileText className="size-4 text-muted-foreground shrink-0" />
+      <span>{doc.name}</span>
+      <Pencil className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+    </div>
+  )
+}
+
 export default function AdminDocumentsPage() {
   const [documents, setDocuments] = useState(initialDocuments)
   const [search, setSearch] = useState("")
@@ -37,6 +75,11 @@ export default function AdminDocumentsPage() {
   const handleDelete = (id: string) => {
     setDocuments((prev) => prev.filter((d) => d.id !== id))
     toast.success("Document deleted")
+  }
+
+  const handleRename = (id: string, name: string) => {
+    setDocuments((prev) => prev.map((d) => (d.id === id ? { ...d, name } : d)))
+    toast.success("Document renamed")
   }
 
   const handleUpload = (e: React.FormEvent<HTMLFormElement>) => {
@@ -119,10 +162,7 @@ export default function AdminDocumentsPage() {
             {filtered.map((doc) => (
               <tr key={doc.id} className="border-b last:border-0">
                 <td className="p-3">
-                  <div className="flex items-center gap-2">
-                    <FileText className="size-4 text-muted-foreground" />
-                    <span>{doc.name}</span>
-                  </div>
+                  <EditableName doc={doc} onRename={handleRename} />
                 </td>
                 <td className="p-3 text-muted-foreground">{doc.type}</td>
                 <td className="p-3 text-muted-foreground">{doc.pages}</td>
