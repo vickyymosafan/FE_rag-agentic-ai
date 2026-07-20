@@ -1,6 +1,7 @@
 "use client"
 
 import { useSession } from "next-auth/react"
+import { ThemeToggle } from "./theme-toggle"
 
 interface StatusBarProps {
   asiScore?: number
@@ -36,6 +37,7 @@ export function StatusBar({
         <span>📄 {sources} sources</span>
         <span>🎯 {confidence.toFixed(2)}</span>
         {cacheHit && <span>⚡ Cache</span>}
+        <ThemeToggle />
       </div>
     </div>
   )
