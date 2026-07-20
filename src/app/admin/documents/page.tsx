@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Upload, FileText, Trash2, Search } from "lucide-react"
 import { toast } from "sonner"
+import { z } from "zod"
 
 interface Document {
   id: string
@@ -38,7 +39,25 @@ export default function AdminDocumentsPage() {
     toast.success("Document deleted")
   }
 
-  const handleUpload = () => {
+  const handleUpload = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const form = new FormData(e.currentTarget)
+    const file = form.get("file") as File | null
+
+    const schema = z.object({
+      file: z
+        .instanceof(File)
+        .refine((f) => ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"].includes(f.type), "Hanya PDF dan DOCX yang didukung.")
+        .refine((f) => f.size > 0, "File tidak boleh kosong")
+        .refine((f) => f.size < 10 * 1024 * 1024, "File maksimal 10MB"),
+    })
+
+    const result = schema.safeParse({ file })
+    if (!result.success) {
+      toast.error(result.error.issues[0].message)
+      return
+    }
+
     toast.success("Upload started. Document will be indexed shortly.")
   }
 
@@ -58,15 +77,15 @@ export default function AdminDocumentsPage() {
           <CardTitle className="text-sm">Upload Document</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-3">
-            <Input type="file" accept=".pdf,.docx" className="flex-1" />
-            <Button onClick={handleUpload} className="gap-2">
+          <form onSubmit={handleUpload} className="flex items-center gap-3">
+            <Input type="file" accept=".pdf,.docx" className="flex-1" name="file" />
+            <Button type="submit" className="gap-2">
               <Upload className="size-4" />
               Upload
             </Button>
-          </div>
+          </form>
           <p className="text-xs text-muted-foreground mt-2">
-            Supported formats: PDF, DOCX
+            Supported formats: PDF, DOCX (max 10MB)
           </p>
         </CardContent>
       </Card>
